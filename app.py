@@ -25,6 +25,10 @@ class users(db.Model):
 def home():
   return render_template("index.html", content="Testing")
 
+@app.route("/view")
+def view():
+  return render_template("view.html", values=users.query.all())
+
 @app.route("/login", methods=["POST", "GET"])
 def login():
   if request.method == "POST":
