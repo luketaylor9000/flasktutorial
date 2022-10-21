@@ -14,7 +14,7 @@ db = SQLAlchemy(app)
 class users(db.Model):
   _id = db.Column("id", db.Integer, primary_key=True)
   name = db.Column(db.String(100))
-  email = db.Column(db.string(100))
+  email = db.Column(db.String(100))
 
   def __init__(self, name, email):
     self.name = name
@@ -31,6 +31,15 @@ def login():
     session.permanent = True
     user = request.form["nm"]
     session["user"] = user
+
+    found_user = users.query.filter_by(name=user).first()
+    if found_user:
+      session["email"] = found_user.email
+    else:
+      usr = users(user, "")
+      db.session.add(usr)
+      db.session.commit()
+
     flash("Login successful!")
     return redirect(url_for("user"))
   else:
@@ -38,6 +47,7 @@ def login():
       flash("Already logged in!")
       return redirect(url_for("user"))
     return render_template("login.html")
+
 
 @app.route("/user", methods=["POST", "GET"])
 def user():
@@ -47,6 +57,9 @@ def user():
     if request.method == "POST":
       email = request.form["email"]
       session["email"] = email
+      found_user = users.query.filter_by(name=user).first()
+      found_user.email = email
+      db.session.commit()
       flash("Email was saved!")
     else:
       if "email" in session:
@@ -55,6 +68,7 @@ def user():
   else:
     flash("You are not logged in!")
     return redirect(url_for("login"))
+
 
 @app.route("/logout")
 def logout():
@@ -68,5 +82,6 @@ def logout():
   return redirect(url_for("login"))
 
 if __name__ == "__main__":
-  db.create_all()
+  with app.app_context():
+    db.create_all()
   app.run(debug=True)
