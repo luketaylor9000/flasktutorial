@@ -23,7 +23,7 @@ class users(db.Model):
 
 @app.route("/")
 def home():
-  return render_template("index.html", content="Testing")
+  return render_template("index.html", content="Home Page")
 
 @app.route("/view")
 def view():
